@@ -6,9 +6,6 @@ their decisions, and whether interaction can amplify particular
 preferences into disproportionate consensus.
 
 ## Contents
-
-- `research_proposal.md` — full research proposal: motivation, method,
-  formal definitions of diversity/convergence/bias, and feasibility.
 - `emergent_convergence_experiment.py` — working pipeline:
   - 12 heterogeneous agent personas (+ a homogeneous-population variant)
   - a battery of 3 closed-choice tasks + 1 open-ended task
