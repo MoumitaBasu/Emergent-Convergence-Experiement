@@ -1,46 +1,146 @@
 # Emergent Convergence and Bias in Interacting LLM Agents
+A computational research prototype exploring how repeated information exchange between LLM-based agents affects decision diversity, convergence, and the amplification of shared preferences.
 
-Prototype for a GoEMMI Göttingen research proposal studying how repeated
-information exchange between LLM-based agents affects the diversity of
-their decisions, and whether interaction can amplify particular
-preferences into disproportionate consensus.
+The project is being developed as a potential research project for the GoEMMI Göttingen Winter School, with a focus on emergence, learning, computation, and complex systems.
 
-## Contents
-- `emergent_convergence_experiment.py` — working pipeline:
-  - 12 heterogeneous agent personas (+ a homogeneous-population variant)
-  - a battery of 3 closed-choice tasks + 1 open-ended task
-  - independent (Round 0) decisions, then N rounds of controlled
-    peer-to-peer information exchange over a sparse interaction graph
-  - categorical (entropy-based) and semantic (embedding-based) diversity
-    metrics
-  - a Monte Carlo, non-interacting baseline used to define a
-    merit-neutral bias amplification score
-  - multi-seed replication across diverse vs. homogeneous populations
+## Research Question
+
+> How does interaction between LLM-based agents affect the diversity of their decisions, and can repeated information exchange lead to the emergence or amplification of shared decision patterns?
+
+The project investigates a simple micro-to-macro setting:
+
+```
+Individual agents
+       ↓
+Independent decisions
+       ↓
+Information exchange
+       ↓
+Repeated interaction
+       ↓
+Collective behaviour
+       ↓
+Convergence / diversity / amplification
+```
+
+## Experimental Design
+The current prototype models a population of 12 heterogeneous LLM-based agents, with an alternative homogeneous-population configuration.
+
+Each agent is assigned a professional persona and receives the same knowledge-work task.
+
+The experiment consists of:
+
+1. Round 0 — Independent decisions
+   - Agents solve the task independently.
+   - Their initial decisions establish the baseline.
+2. Interaction rounds
+   - Agents exchange information through a controlled, sparse peer-to-peer interaction graph.
+   - Agents reconsider and revise their decisions after receiving information from other agents.
+3. Measurement
+   - Decision diversity is measured after each round.
+   - Changes in the distribution of decisions are examined for convergence and potential amplification of particular preferences.
+4. Replication
+   - Multiple random seeds are used to examine whether observed patterns are robust across different interaction configurations.
+   - Diverse and homogeneous agent populations can be compared.
+
+## Current Experimental Components
+The experimental pipeline currently includes:
+
+- 12 heterogeneous agent personas
+- A homogeneous-population variant
+- 3 closed-choice knowledge-work tasks
+- 1 open-ended knowledge-work task
+- Independent baseline decisions
+- Controlled peer-to-peer information exchange
+- Sparse interaction graphs
+- Categorical, entropy-based diversity metrics
+- Semantic, embedding-based diversity metrics
+- A non-interacting Monte Carlo baseline
+- A merit-neutral bias amplification measure
+- Multi-seed replication
+
+## Why This Project?
+The project is motivated by the question of how system-level behaviour can emerge from interactions between individual computational agents.
+
+Rather than assuming that interaction necessarily improves collective decision-making, the experiment investigates whether information exchange can produce:
+
+- convergence between initially different agents
+- loss of decision diversity
+- persistence or amplification of particular preferences
+- different collective outcomes depending on the initial diversity of the population
+
+The goal is to explore these phenomena computationally while keeping the experimental setup reproducible and interpretable.
 
 ## Setup
 
+### 1. Install dependencies
+
 ```bash
 pip install -r requirements.txt
+```
+
+### 2. Create your environment file
+
+```bash
 cp .env.example .env
-# then edit .env and paste your key: GEMINI_API_KEY=your_actual_key
+```
+
+Then add your Gemini API key:
+
+```bash
+GEMINI_API_KEY=your_actual_key
+```
+
+Do not commit your `.env` file to GitHub.
+
+The repository includes `.env` in `.gitignore`, and the script loads the key locally using `python-dotenv`.
+
+### 3. Run the experiment
+
+```bash
 python emergent_convergence_experiment.py
 ```
 
-Get a free Gemini API key at https://aistudio.google.com/apikey — Google's
-free tier is generous enough for the smoke-test scale (a few seeds, one
-task) before committing to the full 5-seed × 3-task battery.
+For initial testing, use a small number of seeds and a single task before running the complete experimental battery.
 
-`.env` is already listed in `.gitignore`, so your key stays local and is
-never committed to the repo — the script loads it automatically via
-`python-dotenv` on every run, so you only have to set it once.
+## Project Structure
 
-The `call_llm()` function is model-agnostic by design — swap it for the
-Anthropic API or any other provider if you want to compare models later.
+```
+.
+├── emergent_convergence_experiment.py
+├── requirements.txt
+├── .gitignore
+├── README.md
+└── .env
+```
+
+### Main files
+
+- `emergent_convergence_experiment.py` — experimental pipeline for agent generation, interaction, decision collection, diversity measurement, baseline comparison, and multi-seed experiments.
+- `requirements.txt` — Python dependencies required to run the project.
+- `.env` — local environment file containing your Gemini API key.
 
 ## Status
+🚧 Early prototype — active development
 
-Prototype validated end-to-end (agent decisions, peer graph, diversity
-metrics, baseline, multi-seed aggregation) against a mocked model
-backend. Not yet run against a live model at full scale — see the
-runtime/cost note in `research_proposal.md` before running the full
-5-seed × 3-task battery.
+The experimental pipeline has been validated end-to-end using a mocked model backend, including agent decisions, peer interaction, diversity metrics, baseline comparison, and multi-seed aggregation.
+
+The project is now being tested with a live Gemini API. The experimental parameters, implementation, and methodology may evolve as the prototype is evaluated.
+
+No empirical conclusions are being claimed yet.
+
+## Future Directions
+Potential extensions include:
+
+- Comparing different LLM models
+- Testing different network structures
+- Varying the degree of initial agent diversity
+- Studying longer interaction sequences
+- Investigating polarization as well as convergence
+- Comparing computational-agent behaviour with small-scale human experiments
+- Exploring information-theoretic measures of collective behaviour
+
+## Research Context
+This is an exploratory computational study, not a claim that LLM agents are equivalent to human participants.
+
+The project uses LLM-based agents as computational systems for investigating how local information exchange can produce collective-level patterns such as convergence and preference amplification.
