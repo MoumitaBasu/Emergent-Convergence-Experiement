@@ -26,6 +26,8 @@ import random
 import textwrap
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import requests
@@ -503,6 +505,19 @@ def print_battery_report(report: dict) -> None:
             print(f"     amplification A_k (mean over seeds): {amp_mean}")
 
 
+RESULTS_DIR = Path(__file__).resolve().parent / "results"
+RESULTS_DIR.mkdir(exist_ok=True)
+
+
+def save_report(report: dict, prefix: str = "experiment") -> Path:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_path = RESULTS_DIR / f"{prefix}_{timestamp}.json"
+    with output_path.open("w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2, ensure_ascii=False)
+    print(f"Saved report to: {output_path}")
+    return output_path
+
+
 if __name__ == "__main__":
     # Full-scale run matching the proposal: 12 agents, 3 tasks, 3 rounds,
     # a 60-agent Monte Carlo baseline per task/population, and 5-seed
@@ -517,3 +532,4 @@ if __name__ == "__main__":
         n_seeds=5,
     )
     print_battery_report(battery_report)
+    save_report(battery_report, prefix="battery")
