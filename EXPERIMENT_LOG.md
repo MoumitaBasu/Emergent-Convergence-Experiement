@@ -29,6 +29,15 @@ API keys and other secrets are intentionally excluded.
 - **Contents:** A partial resource-prioritization report for a diverse population, with a three-agent baseline and zero-valued diversity, convergence, and amplification summaries.
 - **Interpretation:** Retained for traceability, but not counted as a verified run in this log.
 
+## 2026-09-06: Resource-prioritization pilot
+
+- **Status:** Completed and saved, but failed data-quality validation; do not interpret as an empirical result.
+- **Command:** `run_full_battery(tasks=TASKS[:1], n_agents=6, n_rounds=2, k_peers=2, baseline_n=12, n_seeds=3)`
+- **Configuration:** One task, 6 agents per population, diverse and homogeneous populations, 12-agent independent baselines, 3 seeds, and 2 interaction rounds.
+- **Report:** [`results/pilot_20260906_071659.json`](results/pilot_20260906_071659.json)
+- **Finding:** The diverse baseline contained 10 `__unmatched__` responses out of 12, and the homogeneous baseline contained 12. The model was frequently returning option letters or forms not recognized by the original normalizer.
+- **Follow-up:** Added `A/B/C` option-letter normalization and regression coverage. This pilot should be rerun before drawing conclusions.
+
 ## Future entries
 
 For each new run, record the date, command, task set, population size, number of rounds, peer count, baseline size, seed count, population type, output path, and whether the run completed successfully.

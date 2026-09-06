@@ -12,6 +12,8 @@ class ChoiceNormalizationTests(unittest.TestCase):
     def test_maps_free_form_choice_to_canonical_option(self):
         options = ["automation", "training", "flexibility"]
 
+        self.assertEqual(normalize_choice("A", options), "automation")
+        self.assertEqual(normalize_choice("option C", options), "flexibility")
         self.assertEqual(
             normalize_choice("Investing in employee training", options),
             "training",

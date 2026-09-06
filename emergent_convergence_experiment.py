@@ -206,6 +206,12 @@ def normalize_choice(choice: str, options: list[str]) -> str:
 
     choice_text = str(choice).strip().lower()
     normalized_choice = re.sub(r"[^a-z0-9]+", " ", choice_text).strip()
+    letter_match = re.fullmatch(r"(?:option )?([a-z])", normalized_choice)
+    if letter_match:
+        option_index = ord(letter_match.group(1)) - ord("a")
+        if 0 <= option_index < len(options):
+            return options[option_index]
+
     choice_tokens = tokens(choice_text)
     matches = []
 

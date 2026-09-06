@@ -1,0 +1,59 @@
+{
+  "resource_prioritization": {
+    "diverse": {
+      "baseline_distribution": {
+        "__unmatched__": 10,
+        "training": 2
+      },
+      "categorical_diversity_mean": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "categorical_diversity_std": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "convergence_lambda_mean": 0.0,
+      "convergence_lambda_std": 0.0,
+      "amplification_mean": {
+        "automation": 0.0,
+        "training": -8.015838059145478,
+        "flexibility": 0.0
+      },
+      "amplification_std": {
+        "automation": 0.0,
+        "training": 5.668053448514982,
+        "flexibility": 0.0
+      }
+    },
+    "homogeneous": {
+      "baseline_distribution": {
+        "__unmatched__": 12
+      },
+      "categorical_diversity_mean": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "categorical_diversity_std": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "convergence_lambda_mean": 0.0,
+      "convergence_lambda_std": 0.0,
+      "amplification_mean": {
+        "automation": 0.0,
+        "training": 0.0,
+        "flexibility": 0.0
+      },
+      "amplification_std": {
+        "automation": 0.0,
+        "training": 0.0,
+        "flexibility": 0.0
+      }
+    }
+  }
+}
