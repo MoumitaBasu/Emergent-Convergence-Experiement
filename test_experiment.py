@@ -1,6 +1,9 @@
+import json
 import unittest
+from unittest.mock import patch
 
 from emergent_convergence_experiment import (
+    Agent,
     UNMATCHED_CHOICE,
     categorical_diversity,
     choice_distribution,
@@ -44,6 +47,28 @@ class ChoiceNormalizationTests(unittest.TestCase):
             {"automation": 1, "training": 1},
         )
         self.assertGreater(categorical_diversity(choices, options), 0.0)
+
+
+class DecisionAuditTests(unittest.TestCase):
+    def test_prompt_requires_exact_allowed_label_and_keeps_raw_response(self):
+        response = json.dumps({
+            "choice": "training",
+            "justification": "Training improves internal capability.",
+            "confidence": 0.8,
+            "assumptions": "The team can implement the program.",
+        })
+
+        with patch("emergent_convergence_experiment.call_llm", return_value=response) as call:
+            agent = Agent(agent_id=0, persona="HR manager")
+            decision = agent.decide(
+                "Choose one initiative.",
+                options=["automation", "training", "flexibility"],
+            )
+
+        prompt = call.call_args.args[0]
+        self.assertIn("Allowed choice labels: automation, training, flexibility", prompt)
+        self.assertIn("must be exactly one allowed label", prompt)
+        self.assertEqual(decision["_raw_response"], response)
 
 
 if __name__ == "__main__":

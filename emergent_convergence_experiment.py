@@ -129,13 +129,18 @@ class Agent:
             )
         return base
 
-    def decide(self, task: str, peer_proposals: list[str] | None = None) -> dict:
+    def decide(self, task: str, peer_proposals: list[str] | None = None,
+               options: list[str] | None = None) -> dict:
+        allowed_labels = ", ".join(options) if options else "a short label"
         if peer_proposals is None:
             prompt = textwrap.dedent(f"""
                 Task: {task}
 
+                Allowed choice labels: {allowed_labels}
+                The "choice" value must be exactly one allowed label, with no option
+                letter, explanation, or extra wording.
                 Give your decision and reasoning as strict JSON with keys:
-                "choice" (a short label, 1-4 words), "justification" (2-3 sentences),
+                "choice" (exactly one allowed label), "justification" (2-3 sentences),
                 "confidence" (0-1 float), "assumptions" (1 sentence).
                 Return only the JSON object, no other text.
             """).strip()
@@ -154,14 +159,18 @@ class Agent:
                 Review these alternatives and reconsider your decision. You may
                 retain, modify, or replace your original proposal.
 
+                Allowed choice labels: {allowed_labels}
+                The "choice" value must be exactly one allowed label, with no option
+                letter, explanation, or extra wording.
                 Give your (possibly revised) decision as strict JSON with keys:
-                "choice" (a short label, 1-4 words), "justification" (2-3 sentences),
+                "choice" (exactly one allowed label), "justification" (2-3 sentences),
                 "confidence" (0-1 float), "assumptions" (1 sentence).
                 Return only the JSON object, no other text.
             """).strip()
 
         raw = call_llm(prompt, system=self.system_prompt())
         parsed = _safe_json(raw)
+        parsed["_raw_response"] = raw
         self.history.append(parsed)
         return parsed
 
@@ -404,9 +413,12 @@ def run_baseline(task_prompt: str, options: list[str], n_agents: int, seed: int 
     agents = build_population(n_agents, planted_bias_fraction=0.0, seed=seed,
                                homogeneous=homogeneous)
     for a in agents:
-        a.decide(task_prompt)
+        a.decide(task_prompt, options=options)
     choices = [a.history[-1].get("choice", "") for a in agents]
-    return choice_distribution(choices, options)
+    return {
+        "distribution": choice_distribution(choices, options),
+        "raw_responses": [a.history[-1]["_raw_response"] for a in agents],
+    }
 
 
 def run_experiment(task_prompt: str, options: list[str], n_agents: int = 12,
@@ -419,7 +431,7 @@ def run_experiment(task_prompt: str, options: list[str], n_agents: int = 12,
                                homogeneous=homogeneous)
 
     for a in agents:
-        a.decide(task_prompt)  # Round 0: independent decisions
+        a.decide(task_prompt, options=options)  # Round 0: independent decisions
 
     trajectory = []
     justifications = [a.history[-1].get("justification", "") for a in agents]
@@ -440,7 +452,7 @@ def run_experiment(task_prompt: str, options: list[str], n_agents: int = 12,
         }
         for a in agents:
             peer_proposals = [current_proposals[pid] for pid in graph[a.agent_id]]
-            a.decide(task_prompt, peer_proposals=peer_proposals)
+            a.decide(task_prompt, peer_proposals=peer_proposals, options=options)
 
         justifications = [a.history[-1].get("justification", "") for a in agents]
         choices = [a.history[-1].get("choice", "") for a in agents]
@@ -477,12 +489,16 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
         task_id = task["id"]
         report[task_id] = {}
         for pop_type, homogeneous in (("diverse", False), ("homogeneous", True)):
-            baseline_dist = run_baseline(task["prompt"], task["options"], n_agents=baseline_n,
-                                          seed=1000, homogeneous=homogeneous)
+            baseline_result = run_baseline(
+                task["prompt"], task["options"], n_agents=baseline_n,
+                seed=1000, homogeneous=homogeneous,
+            )
+            baseline_dist = baseline_result["distribution"]
 
             div_by_round = []   # list of lists: [seed][round]
             lambdas = []
             final_amplifications = []
+            interaction_raw_responses = []
 
             for seed in range(n_seeds):
                 result = run_experiment(
@@ -494,6 +510,13 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
                 )
                 div_by_round.append([p["categorical_diversity"] for p in result["trajectory"]])
                 lambdas.append(result["convergence_fit"]["lambda"])
+                interaction_raw_responses.append([
+                    {
+                        "agent_id": agent.agent_id,
+                        "rounds": [entry["_raw_response"] for entry in agent.history],
+                    }
+                    for agent in result["agents"]
+                ])
                 final_dist = result["trajectory"][-1]["distribution"]
                 final_amplifications.append(
                     amplification_scores(final_dist, baseline_dist, task["options"])
@@ -510,6 +533,8 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
 
             report[task_id][pop_type] = {
                 "baseline_distribution": baseline_dist,
+                "baseline_raw_responses": baseline_result["raw_responses"],
+                "interaction_raw_responses": interaction_raw_responses,
                 "categorical_diversity_mean": div_arr.mean(axis=0).tolist(),
                 "categorical_diversity_std": div_arr.std(axis=0).tolist(),
                 "convergence_lambda_mean": float(np.mean(lambdas)),
