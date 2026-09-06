@@ -46,6 +46,7 @@ API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:gene
 # still hit 429s, lower it if you're on a paid tier with higher limits.
 REQUEST_DELAY_SECONDS = 4.5
 MAX_RETRIES = 5
+API_REQUEST_COUNT = 0
 
 
 # ---------------------------------------------------------------------
@@ -58,6 +59,10 @@ def call_llm(prompt: str, system: str | None = None, max_tokens: int = 400) -> s
     backoff on 429 (rate limit) responses, so a long multi-seed battery
     run doesn't die partway through on a free-tier key.
     """
+    global API_REQUEST_COUNT
+    API_REQUEST_COUNT += 1
+    request_id = API_REQUEST_COUNT
+    print(f"[api] request {request_id} started", flush=True)
     api_key = os.environ.get("GEMINI_API_KEY", "")
     payload = {
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
@@ -92,6 +97,7 @@ def call_llm(prompt: str, system: str | None = None, max_tokens: int = 400) -> s
         data = resp.json()
         try:
             parts = data["candidates"][0]["content"]["parts"]
+            print(f"[api] request {request_id} completed", flush=True)
             return "".join(p.get("text", "") for p in parts)
         except (KeyError, IndexError):
             # e.g. response blocked by safety filters, or malformed candidate
@@ -412,8 +418,10 @@ def run_baseline(task_prompt: str, options: list[str], n_agents: int, seed: int 
     """
     agents = build_population(n_agents, planted_bias_fraction=0.0, seed=seed,
                                homogeneous=homogeneous)
+    print(f"[baseline] start agents={n_agents} homogeneous={homogeneous}", flush=True)
     for a in agents:
         a.decide(task_prompt, options=options)
+    print(f"[baseline] completed agents={n_agents} homogeneous={homogeneous}", flush=True)
     choices = [a.history[-1].get("choice", "") for a in agents]
     return {
         "distribution": choice_distribution(choices, options),
@@ -501,7 +509,9 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
     for task in tasks:
         task_id = task["id"]
         report[task_id] = {}
+        print(f"[task] start {task_id}", flush=True)
         for pop_type, homogeneous in (("diverse", False), ("homogeneous", True)):
+            print(f"[population] start task={task_id} type={pop_type}", flush=True)
             baseline_result = run_baseline(
                 task["prompt"], task["options"], n_agents=baseline_n,
                 seed=1000, homogeneous=homogeneous,
@@ -514,6 +524,10 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
             interaction_raw_responses = []
 
             for seed in range(n_seeds):
+                print(
+                    f"[seed] start task={task_id} population={pop_type} seed={seed}",
+                    flush=True,
+                )
                 result = run_experiment(
                     task["prompt"], task["options"], n_agents=n_agents,
                     n_rounds=n_rounds, k_peers=k_peers,
@@ -533,6 +547,10 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
                 final_dist = result["trajectory"][-1]["distribution"]
                 final_amplifications.append(
                     amplification_scores(final_dist, baseline_dist, task["options"])
+                )
+                print(
+                    f"[seed] completed task={task_id} population={pop_type} seed={seed}",
+                    flush=True,
                 )
 
             div_arr = np.array(div_by_round)  # shape (n_seeds, n_rounds+1)
@@ -555,6 +573,8 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
                 "amplification_mean": amp_mean,
                 "amplification_std": amp_std,
             }
+            print(f"[population] completed task={task_id} type={pop_type}", flush=True)
+        print(f"[task] completed {task_id}", flush=True)
     return report
 
 
