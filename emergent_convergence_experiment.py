@@ -23,6 +23,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import re
 import textwrap
 import time
 from dataclasses import dataclass, field
@@ -194,10 +195,36 @@ def population_diversity(justifications: list[str]) -> float:
     return float(1 - off_diag.mean())
 
 
-def choice_distribution(choices: list[str]) -> dict:
+UNMATCHED_CHOICE = "__unmatched__"
+
+
+def normalize_choice(choice: str, options: list[str]) -> str:
+    """Map free-form model output to one canonical task option."""
+    def tokens(value: str) -> set[str]:
+        words = re.sub(r"[^a-z0-9]+", " ", value.lower()).strip().split()
+        return {word[:-1] if word.endswith("s") and len(word) > 3 else word for word in words}
+
+    choice_text = str(choice).strip().lower()
+    normalized_choice = re.sub(r"[^a-z0-9]+", " ", choice_text).strip()
+    choice_tokens = tokens(choice_text)
+    matches = []
+
+    for option in options:
+        normalized_option = re.sub(r"[^a-z0-9]+", " ", option.lower()).strip()
+        option_tokens = tokens(option)
+        if normalized_option and (
+            normalized_option in normalized_choice
+            or option_tokens.issubset(choice_tokens)
+        ):
+            matches.append(option)
+
+    return matches[0] if len(matches) == 1 else UNMATCHED_CHOICE
+
+
+def choice_distribution(choices: list[str], options: list[str] | None = None) -> dict:
     dist: dict[str, int] = {}
     for c in choices:
-        key = c.strip().lower()
+        key = normalize_choice(c, options) if options else c.strip().lower()
         dist[key] = dist.get(key, 0) + 1
     return dict(sorted(dist.items(), key=lambda kv: -kv[1]))
 
@@ -213,11 +240,9 @@ def categorical_diversity(choices: list[str], options: list[str]) -> float:
         return 0.0
     counts = {opt: 0 for opt in options}
     for c in choices:
-        key = c.strip().lower()
-        for opt in options:
-            if opt in key:
-                counts[opt] += 1
-                break
+        key = normalize_choice(c, options)
+        if key in counts:
+            counts[key] += 1
     n = sum(counts.values())
     if n == 0:
         return 0.0
@@ -363,7 +388,7 @@ def sparse_peer_graph(agents: list[Agent], k_peers: int, seed: int = 0) -> dict[
 # ---------------------------------------------------------------------
 # Single-run experiment
 # ---------------------------------------------------------------------
-def run_baseline(task_prompt: str, n_agents: int, seed: int = 0,
+def run_baseline(task_prompt: str, options: list[str], n_agents: int, seed: int = 0,
                   homogeneous: bool = False) -> dict:
     """
     Sec 4.4 step 1: purely independent agents, NO interaction, used to
@@ -375,7 +400,7 @@ def run_baseline(task_prompt: str, n_agents: int, seed: int = 0,
     for a in agents:
         a.decide(task_prompt)
     choices = [a.history[-1].get("choice", "") for a in agents]
-    return choice_distribution(choices)
+    return choice_distribution(choices, options)
 
 
 def run_experiment(task_prompt: str, options: list[str], n_agents: int = 12,
@@ -397,7 +422,7 @@ def run_experiment(task_prompt: str, options: list[str], n_agents: int = 12,
         "round": 0,
         "semantic_diversity": population_diversity(justifications),
         "categorical_diversity": categorical_diversity(choices, options),
-        "distribution": choice_distribution(choices),
+        "distribution": choice_distribution(choices, options),
     })
 
     graph = sparse_peer_graph(agents, k_peers, seed=seed)
@@ -417,7 +442,7 @@ def run_experiment(task_prompt: str, options: list[str], n_agents: int = 12,
             "round": r,
             "semantic_diversity": population_diversity(justifications),
             "categorical_diversity": categorical_diversity(choices, options),
-            "distribution": choice_distribution(choices),
+            "distribution": choice_distribution(choices, options),
         })
 
     convergence_fit = fit_convergence_rate([p["categorical_diversity"] for p in trajectory])
@@ -446,7 +471,7 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
         task_id = task["id"]
         report[task_id] = {}
         for pop_type, homogeneous in (("diverse", False), ("homogeneous", True)):
-            baseline_dist = run_baseline(task["prompt"], n_agents=baseline_n,
+            baseline_dist = run_baseline(task["prompt"], task["options"], n_agents=baseline_n,
                                           seed=1000, homogeneous=homogeneous)
 
             div_by_round = []   # list of lists: [seed][round]
