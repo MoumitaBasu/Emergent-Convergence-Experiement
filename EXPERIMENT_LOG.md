@@ -36,7 +36,15 @@ API keys and other secrets are intentionally excluded.
 - **Configuration:** One task, 6 agents per population, diverse and homogeneous populations, 12-agent independent baselines, 3 seeds, and 2 interaction rounds.
 - **Report:** [`results/pilot_20260906_071659.json`](results/pilot_20260906_071659.json)
 - **Finding:** The diverse baseline contained 10 `__unmatched__` responses out of 12, and the homogeneous baseline contained 12. The model was frequently returning option letters or forms not recognized by the original normalizer.
-- **Follow-up:** Added `A/B/C` option-letter normalization and regression coverage. This pilot should be rerun before drawing conclusions.
+- **Follow-up:** Added `A/B/C` option-letter normalization and regression coverage, then reran the same pilot.
+
+## 2026-09-06: Corrected resource-prioritization pilot rerun
+
+- **Status:** Completed and saved, but still failed data-quality validation; do not interpret as an empirical result.
+- **Configuration:** Same as the diagnostic pilot: 6 agents per population, 2 interaction rounds, 2 peers per agent, 12-agent baselines, and 3 seeds for diverse and homogeneous populations.
+- **Report:** [`results/pilot_fixed_20260906_073112.json`](results/pilot_fixed_20260906_073112.json)
+- **Finding:** The baseline distributions remained mostly `__unmatched__` after adding letter normalization: 10 of 12 diverse responses and all 12 homogeneous responses were unmatched.
+- **Next debugging step:** Preserve raw model responses and strengthen the task prompt with an explicit allowed-label contract before rerunning the pilot.
 
 ## Future entries
 
