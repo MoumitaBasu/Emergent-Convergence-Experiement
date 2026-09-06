@@ -46,6 +46,21 @@ API keys and other secrets are intentionally excluded.
 - **Finding:** The baseline distributions remained mostly `__unmatched__` after adding letter normalization: 10 of 12 diverse responses and all 12 homogeneous responses were unmatched.
 - **Next debugging step:** Preserve raw model responses and strengthen the task prompt with an explicit allowed-label contract before rerunning the pilot.
 
+## 2026-09-06: Audited pilot attempt
+
+- **Status:** Stopped during the large configuration before a report was written.
+- **Configuration:** Same 6-agent, 2-round, 3-seed pilot, with raw-response auditing enabled.
+- **Reason stopped:** The 132 paced API calls were expected to take approximately 10 or more minutes; a compact validation run was used instead.
+- **Result:** No report was written.
+
+## 2026-09-06: Audited smoke validation
+
+- **Status:** Passed data-quality validation; report saved and pushed.
+- **Configuration:** One resource-prioritization task, 2 agents per population, diverse and homogeneous populations, 2-agent baselines, 1 seed, 1 interaction round, and 1 peer per agent.
+- **Report:** [`results/audited_smoke_20260906_073752.json`](results/audited_smoke_20260906_073752.json)
+- **Finding:** All baseline choices mapped to canonical labels with no `__unmatched__` responses. The report preserves raw baseline responses and raw responses for every agent and interaction round.
+- **Note:** This validates the prompt and auditing pipeline; the sample is still too small for research conclusions.
+
 ## Future entries
 
 For each new run, record the date, command, task set, population size, number of rounds, peer count, baseline size, seed count, population type, output path, and whether the run completed successfully.
