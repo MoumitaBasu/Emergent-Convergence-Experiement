@@ -1,0 +1,24 @@
+[task] start resource_prioritization
+[population] start task=resource_prioritization type=diverse
+[baseline] start agents=60 homogeneous=False
+[api] request 1 started
+  [rate limited, attempt 1/5 -- waiting 4.5s]
+  [rate limited, attempt 2/5 -- waiting 9.0s]
+  [rate limited, attempt 3/5 -- waiting 18.0s]
+  [rate limited, attempt 4/5 -- waiting 36.0s]
+  [rate limited, attempt 5/5 -- waiting 72.0s]
+Traceback (most recent call last):
+  File "/workspaces/Emergent-Convergence-Experiement/emergent_convergence_experiment.py", line 616, in <module>
+    battery_report = run_full_battery(
+                     ^^^^^^^^^^^^^^^^^
+  File "/workspaces/Emergent-Convergence-Experiement/emergent_convergence_experiment.py", line 515, in run_full_battery
+    baseline_result = run_baseline(
+                      ^^^^^^^^^^^^^
+  File "/workspaces/Emergent-Convergence-Experiement/emergent_convergence_experiment.py", line 423, in run_baseline
+    a.decide(task_prompt, options=options)
+  File "/workspaces/Emergent-Convergence-Experiement/emergent_convergence_experiment.py", line 177, in decide
+    raw = call_llm(prompt, system=self.system_prompt())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Emergent-Convergence-Experiement/emergent_convergence_experiment.py", line 109, in call_llm
+    raise RuntimeError(f"Gemini API rate-limited after {MAX_RETRIES} retries.")
+RuntimeError: Gemini API rate-limited after 5 retries.
