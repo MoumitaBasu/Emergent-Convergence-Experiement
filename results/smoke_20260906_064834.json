@@ -1,0 +1,56 @@
+{
+  "resource_prioritization": {
+    "diverse": {
+      "baseline_distribution": {
+        "investing in employee training": 1,
+        "automating back-office processes": 1
+      },
+      "categorical_diversity_mean": [
+        0.0,
+        0.0
+      ],
+      "categorical_diversity_std": [
+        0.0,
+        0.0
+      ],
+      "convergence_lambda_mean": 0.0,
+      "convergence_lambda_std": 0.0,
+      "amplification_mean": {
+        "automation": 0.0,
+        "training": 0.0,
+        "flexibility": 0.0
+      },
+      "amplification_std": {
+        "automation": 0.0,
+        "training": 0.0,
+        "flexibility": 0.0
+      }
+    },
+    "homogeneous": {
+      "baseline_distribution": {
+        "automating back-office processes": 1,
+        "automating repetitive back-office processes": 1
+      },
+      "categorical_diversity_mean": [
+        0.0,
+        0.0
+      ],
+      "categorical_diversity_std": [
+        0.0,
+        0.0
+      ],
+      "convergence_lambda_mean": 0.0,
+      "convergence_lambda_std": 0.0,
+      "amplification_mean": {
+        "automation": 0.0,
+        "training": 0.0,
+        "flexibility": 0.0
+      },
+      "amplification_std": {
+        "automation": 0.0,
+        "training": 0.0,
+        "flexibility": 0.0
+      }
+    }
+  }
+}
