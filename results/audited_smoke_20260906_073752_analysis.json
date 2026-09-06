@@ -1,0 +1,46 @@
+{
+  "metadata": {},
+  "tasks": {
+    "resource_prioritization": {
+      "diverse": {
+        "baseline_distribution": {
+          "training": 1,
+          "automation": 1
+        },
+        "categorical_diversity_mean": [
+          0.6309297535714574,
+          0.6309297535714574
+        ],
+        "categorical_diversity_std": [
+          0.0,
+          0.0
+        ],
+        "convergence_lambda_mean": 0.0,
+        "amplification_mean": {
+          "automation": 0.0,
+          "training": 0.0,
+          "flexibility": 0.0
+        }
+      },
+      "homogeneous": {
+        "baseline_distribution": {
+          "automation": 2
+        },
+        "categorical_diversity_mean": [
+          0.0,
+          0.0
+        ],
+        "categorical_diversity_std": [
+          0.0,
+          0.0
+        ],
+        "convergence_lambda_mean": 0.0,
+        "amplification_mean": {
+          "automation": 0.0,
+          "training": 0.0,
+          "flexibility": 0.0
+        }
+      }
+    }
+  }
+}

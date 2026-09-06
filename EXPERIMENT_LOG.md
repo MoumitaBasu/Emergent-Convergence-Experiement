@@ -61,6 +61,14 @@ API keys and other secrets are intentionally excluded.
 - **Finding:** All baseline choices mapped to canonical labels with no `__unmatched__` responses. The report preserves raw baseline responses and raw responses for every agent and interaction round.
 - **Note:** This validates the prompt and auditing pipeline; the sample is still too small for research conclusions.
 
+## 2026-09-06: Audited smoke analysis
+
+- **Status:** Completed.
+- **Inputs:** [`results/audited_smoke_20260906_073752.json`](results/audited_smoke_20260906_073752.json)
+- **Outputs:** [`results/audited_smoke_20260906_073752_analysis.png`](results/audited_smoke_20260906_073752_analysis.png) and [`results/audited_smoke_20260906_073752_analysis.json`](results/audited_smoke_20260906_073752_analysis.json)
+- **Analysis:** Compared baseline choice distributions and categorical diversity across the independent and one-interaction-round measurements for diverse and homogeneous populations.
+- **Interpretation:** The diverse smoke population retained higher categorical diversity than the homogeneous population, but the sample is too small to support a research conclusion.
+
 ## Future entries
 
 For each new run, record the date, command, task set, population size, number of rounds, peer count, baseline size, seed count, population type, output path, and whether the run completed successfully.

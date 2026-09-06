@@ -27,7 +27,7 @@ import re
 import textwrap
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -484,7 +484,20 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
       - mean +/- std convergence rate (lambda)
       - mean amplification score per option, at the final round
     """
-    report = {}
+    report = {
+        "metadata": {
+            "model": MODEL,
+            "request_delay_seconds": REQUEST_DELAY_SECONDS,
+            "n_agents": n_agents,
+            "n_rounds": n_rounds,
+            "k_peers": k_peers,
+            "planted_bias_fraction": planted_bias_fraction,
+            "baseline_n": baseline_n,
+            "n_seeds": n_seeds,
+            "task_ids": [task["id"] for task in tasks],
+            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        }
+    }
     for task in tasks:
         task_id = task["id"]
         report[task_id] = {}
@@ -547,6 +560,8 @@ def run_full_battery(tasks: list[dict] = TASKS, n_agents: int = 12, n_rounds: in
 
 def print_battery_report(report: dict) -> None:
     for task_id, pops in report.items():
+        if task_id == "metadata":
+            continue
         print(f"\n=== Task: {task_id} ===")
         for pop_type, stats in pops.items():
             print(f"  -- {pop_type} population --")

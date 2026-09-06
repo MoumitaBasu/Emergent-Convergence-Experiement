@@ -103,6 +103,14 @@ python emergent_convergence_experiment.py
 
 For initial testing, use a small number of seeds and a single task before running the complete experimental battery.
 
+### 4. Analyze a saved report
+
+```bash
+python analyze_results.py results/audited_smoke_20260906_073752.json
+```
+
+This writes a PNG comparison plot and a JSON analysis summary beside the input report. New battery reports also include the model, experiment parameters, task IDs, request pacing, and UTC generation timestamp in their `metadata` section.
+
 ## Project Structure
 
 ```
